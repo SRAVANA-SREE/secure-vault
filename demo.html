@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AES Encryption & Decryption Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top right, #0f172a, #1e293b);
+      color: #fff;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #tsparticles {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      z-index: 1000;
+    }
+
+    header .left-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .toggle-btn {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    nav a {
+      color: #f1f5f9;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #38bdf8;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 500px;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 1s ease-out;
+      margin-top: 150px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0 20px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #ffeb99;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ffe46e;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .explosion {
+      position: absolute;
+      border-radius: 50%;
+      width: 4px;
+      height: 4px;
+      background: #ffeb99;
+      animation: explode 0.8s linear;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(5); opacity: 0; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="tsparticles"></canvas>
+  <header>
+    <div class="left-controls">
+      <button class="toggle-btn" onclick="document.body.classList.toggle('light')">Toggle Theme</button>
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="demo.html">Demo</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main style="flex: 1; display: flex; justify-content: center; align-items: center;">
+    <div class="container">
+      <h2>🔐 AES Encryption & Decryption</h2>
+
+      <label>Enter Secret Key:</label>
+      <input type="text" id="key" placeholder="Enter your secret key" />
+
+      <label>Text to Encrypt:</label>
+      <textarea id="plaintext" placeholder="Enter plain text..."></textarea>
+
+      <button onclick="encryptText()">Encrypt</button>
+
+      <label>Encrypted Output:</label>
+      <textarea id="encryptedOutput" readonly></textarea>
+
+      <label>Text to Decrypt:</label>
+      <textarea id="ciphertext" placeholder="Paste encrypted text..."></textarea>
+
+      <button onclick="decryptText()">Decrypt</button>
+
+      <label>Decrypted Output:</label>
+      <textarea id="decryptedOutput" readonly></textarea>
+
+      <div class="footer">© 2025 SecureVault Project</div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('click', e => {
+      for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('span');
+        particle.classList.add('explosion');
+        particle.style.left = `${e.clientX}px`;
+        particle.style.top = `${e.clientY}px`;
+        particle.style.position = 'absolute';
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 800);
+      }
+    });
+
+    tsParticles.load("tsparticles", {
+      background: { color: { value: "transparent" } },
+      fpsLimit: 60,
+      particles: {
+        number: { value: 50, density: { enable: true, value_area: 800 } },
+        color: { value: "#38bdf8" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5 },
+        size: { value: 3, random: true },
+        move: {
+          enable: true,
+          speed: 1,
+          direction: "none",
+          random: false,
+          straight: false,
+          outModes: "out"
+        },
+        links: {
+          enable: true,
+          distance: 150,
+          color: "#38bdf8",
+          opacity: 0.4,
+          width: 1
+        }
+      },
+      detectRetina: true
+    });
+
+    function encryptText() {
+      const key = document.getElementById('key').value;
+      const plaintext = document.getElementById('plaintext').value;
+
+      if (key && plaintext) {
+        const encrypted = CryptoJS.AES.encrypt(plaintext, key).toString();
+        document.getElementById('encryptedOutput').value = encrypted;
+      } else {
+        alert("Please enter both secret key and text to encrypt.");
+      }
+    }
+
+    function decryptText() {
+      const key = document.getElementById('key').value;
+      const ciphertext = document.getElementById('ciphertext').value;
+
+      if (key && ciphertext) {
+        try {
+          const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+          const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+          if (!decrypted) throw Error();
+          document.getElementById('decryptedOutput').value = decrypted;
+        } catch (e) {
+          alert("Decryption failed. Check if the key and encrypted text are correct.");
+        }
+      } else {
+        alert("Please enter both secret key and encrypted text.");
+      }
+    }
+  </script>
+</body>
+</html>
